@@ -11,11 +11,12 @@ Public Function ExcelDump_Dump(book As Workbook)
     If outputDir <> "" Then
         
         DumpModules_ book, outputDir
+        DumpFormulasOfAllCellsOfAllSheets_ book, outputDir
+        DumpValuesOfAllCellsOfAllSheets_ book, outputDir
         
     End If
     
 End Function
-
 
 Private Function SelectOutputDir_() As String
     
@@ -31,6 +32,58 @@ Private Function SelectOutputDir_() As String
         End If
         
     End With
+    
+End Function
+
+Private Function DumpValuesOfAllCellsOfAllSheets_(book As Workbook, outputDir As String)
+    
+    Dim sht As Worksheet
+    Dim rng As Range
+    Dim filenum As Integer
+    
+    For Each sht In book.Worksheets
+        
+        filenum = FreeFile
+        
+        On Error GoTo CLOSE_FILE:
+        Open outputDir & "\" & sht.Name & "_Value.txt" For Output As filenum
+        
+        With sht
+            For Each rng In .UsedRange
+               Write #filenum, rng.Address, rng.Value2
+            Next rng
+        End With
+    
+CLOSE_FILE:
+        Close filenum
+    
+    Next sht
+    
+End Function
+
+Private Function DumpFormulasOfAllCellsOfAllSheets_(book As Workbook, outputDir As String)
+    
+    Dim sht As Worksheet
+    Dim rng As Range
+    Dim filenum As Integer
+    
+    For Each sht In book.Worksheets
+        
+        filenum = FreeFile
+        
+        On Error GoTo CLOSE_FILE:
+        Open outputDir & "\" & sht.Name & "_Formula.txt" For Output As filenum
+        
+        With sht
+            For Each rng In .UsedRange
+               Write #filenum, rng.Address, rng.Formula
+            Next rng
+        End With
+    
+CLOSE_FILE:
+        Close filenum
+    
+    Next sht
     
 End Function
 
